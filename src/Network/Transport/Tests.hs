@@ -563,13 +563,13 @@ testCloseSelf newTransport = do
   -- connection anymore, or open more self connections, but the self connection
   -- to the second endpoint should still be fine
   closeEndPoint endpoint1
-  Left (TransportError SendFailed _) <- send conn2 ["ping"]
+  Left (TransportError SendClosed _) <- send conn2 ["ping"]
   Left (TransportError ConnectFailed _) <- connect endpoint1 (address endpoint1) ReliableOrdered defaultConnectHints
   Right () <- send conn3 ["ping"]
 
   -- Close the transport; now the second should no longer work
   closeTransport transport
-  Left (TransportError SendFailed _) <- send conn3 ["ping"]
+  Left (TransportError SendClosed _ ) <- send conn3 ["ping"]
   Left (TransportError ConnectFailed _) <- connect endpoint2 (address endpoint2) ReliableOrdered defaultConnectHints
 
   return ()
@@ -646,7 +646,7 @@ testCloseEndPoint transport _ = do
       EndPointClosed <- receive endpoint
 
       -- Attempt to send should fail with connection closed
-      Left (TransportError SendFailed _) <- send conn ["ping2"]
+      Left (TransportError SendClosed _) <- send conn ["ping2"]
 
       -- An attempt to close the already closed connection should just return
       () <- close conn
